@@ -21,6 +21,7 @@ from app.schemas.token import TokenResponse
 from app.schemas.user import UserCreate, UserResponse, UserLogin
 from app.database import Base, get_db, engine
 
+
 # Create tables on startup
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,7 +36,6 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
-
 # Mount the static files directory
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
