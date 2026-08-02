@@ -1,3 +1,20 @@
+"""
+FastAPI Main Application Module
+
+This module defines the main FastAPI application, including:
+- Application initialization and configuration
+- API endpoints for user authentication
+- API endpoints for calculation management (BREAD operations)
+- Web routes for HTML templates
+- Database table creation on startup
+
+The application follows a RESTful API design with proper separation of concerns:
+- Routes handle HTTP requests and responses
+- Models define database structure
+- Schemas validate request/response data
+- Dependencies handle authentication and database sessions
+"""
+
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from uuid import UUID
@@ -22,9 +39,23 @@ from app.schemas.user import UserCreate, UserResponse, UserLogin
 from app.database import Base, get_db, engine
 
 
+
+
+
+
 # Create tables on startup
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager for FastAPI.
+    
+    This runs when the application starts and creates all database tables
+    defined in SQLAlchemy models. It's an alternative to using Alembic
+    for simpler applications.
+    
+    Args:
+        app: FastAPI application instance
+    """
     print("Creating tables...")
     Base.metadata.create_all(bind=engine)
     print("Tables created successfully!")
@@ -82,6 +113,42 @@ def dashboard_page(request: Request):
         name="dashboard.html",
         context={}
     )
+
+@app.get("/dashboard/view/{calc_id}", response_class=HTMLResponse, tags=["web"])
+def view_calculation_page(request: Request, calc_id: str):
+    """
+    Page for viewing a single calculation (Read).
+    
+    Part of the BREAD (Browse, Read, Edit, Add, Delete) pattern:
+    - This is the Read page
+    
+    Args:
+        request: The FastAPI request object (required by Jinja2)
+        calc_id: UUID of the calculation to view
+        
+    Returns:
+        HTMLResponse: Rendered template with calculation ID passed to frontend
+    """
+    return templates.TemplateResponse("view_calculation.html", {"request": request, "calc_id": calc_id})
+
+@app.get("/dashboard/edit/{calc_id}", response_class=HTMLResponse, tags=["web"])
+def edit_calculation_page(request: Request, calc_id: str):
+    """
+    Page for editing a calculation (Update).
+    
+    Part of the BREAD (Browse, Read, Edit, Add, Delete) pattern:
+    - This is the Edit page
+    
+    Args:
+        request: The FastAPI request object (required by Jinja2)
+        calc_id: UUID of the calculation to edit
+        
+    Returns:
+        HTMLResponse: Rendered template with calculation ID passed to frontend
+    """
+    return templates.TemplateResponse("edit_calculation.html", {"request": request, "calc_id": calc_id})
+
+
 
 # ------------------------------------------------------------------------------
 # Health Endpoint
